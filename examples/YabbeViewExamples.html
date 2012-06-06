@@ -1,0 +1,168 @@
+<html>
+<head>
+	<script type="text/javascript" src="../lib/jquery.js"></script>
+	<script type="text/javascript" src="../lib/underscore.js"></script>
+	<script type="text/javascript" src="../lib/backbone.js"></script>
+	<script type="text/javascript" src="../yabbe.js"></script>
+
+	<style>
+		.example {
+			background: #DDD;
+		}
+	</style>
+
+</head>
+<body>
+
+	<h1>Simple short-hand text binding</h1>
+	<script type="text/javascript">
+		$(function() {
+			// added to window for manipulation in console for the curious
+			window.ex1model = new Backbone.Model({
+				title: "first example",
+				status: "ready"
+			});
+
+			var Ex1View = Yabbe.View.extend({
+				model: ex1model,
+				el: $("#ex1"),
+				bindings: { // pretty much the same as events except we specify a jquery function to call and property to watch
+					"text span": "title",
+					"text div > label": "status",
+				}
+			});
+
+			var ex1view = new Ex1View();
+
+			// Simple task to update our model
+			var i = 0;
+			setInterval(function() {
+				ex1model.set("status", (i % 2 == 0) ? "down" : "ready");
+				++i;
+			}, 1000);
+		});
+	</script>
+
+	<div id="ex1" class="example">
+		<span></span>
+		<div>
+			<label></label>
+		</div>
+	</div>
+
+	<h1>Short-hand text binding with computed properties</h1>
+	<script>
+	$(function() {
+		var Ex2Model = Backbone.Model.extend({
+			someComputedProp: function() {
+				return this.get("title") + " " + this.get("author");
+			}
+		});
+
+		window.ex2model = new Ex2Model({
+			title: "The Time Machine",
+			author: "H. G. Wells"
+		});
+
+		var Ex2View = Yabbe.View.extend({
+			model: ex2model,
+			el: $("#ex2"),
+			bindings: {
+				"text div.book": "someComputedProp"
+			}
+		});
+
+		var ex2view = new Ex2View();
+
+		// When any dependency of a compute property is changed
+		// then the view is updated.
+		var i = 0;
+		setInterval(function() {
+			ex2model.set("title", (i % 2 == 0) ? "The Invisible Man" : "The Time Machine");
+			++i;
+		}, 1000);
+	});
+	</script>
+	<div id="ex2" class="example">
+		<div class="book"></div>
+	</div>
+
+	<h1>Short-hand binding with middleware</h1>
+	<script>
+		$(function() {
+			window.ex3model = new Backbone.Model();
+
+			var Ex3View = Yabbe.View.extend({
+				model: ex3model,
+				el: $("#ex3"),
+				bindings: {
+					"html div > .someClass": "uglyProp"
+				},
+
+				// And of course we can just fall back to using "events"
+				// if we don't want to use data binding.
+
+				middleware: {
+					toView: { // TODO: default to toView instead...?
+						"div > .someClass": function(value) {
+							value || (value = "") // TODO: how do we want to handle undefined in general...?
+							return "<b><i>CHECK IT OUT!: " + value.toUpperCase() + "</i></b>";
+						}
+					}
+				}
+			});
+
+			new Ex3View();
+
+			ex3model.set("uglyProp", "very cool");
+
+			var i = 0;
+			setInterval(function() {
+				ex3model.set("uglyProp", (i % 2 == 0) ? "zorgburg" : "very cool");
+				++i;
+			}, 1000);
+		});
+	</script>
+	<div id="ex3" class="example">
+		<div>
+			<span class="someClass"></span>
+		</div>
+	</div>
+
+	<h1>Long-hand method, specifying a bunch of coolish stuff</h1>
+	<script>
+		$(function() {
+			var Ex4Model = Backbone.Model.extend({
+				concatenated: function() {
+					return this.get("fname") + " " + this.get("lname");
+				}
+			});
+			window.ex4model = new Ex4Model({
+				active: false,
+				onDeck: false
+			});
+
+			var Ex4View = Yabbe.View.extend({
+				model: ex4model,
+				el: $("#ex4"),
+				bindings: {
+					"span": {
+						fn: "text",
+						field: "concatenated"
+					},
+
+					"div": {
+						fn: {
+							true: ["addClass", "active"],
+							false: ["removeClass", "active"]
+						},
+						field: "active"
+					}
+				}
+			});
+		});
+	</script>
+	<div id="ex4" class="example">
+	</div>
+</body>
+</html>
