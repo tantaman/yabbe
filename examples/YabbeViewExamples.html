@@ -77,10 +77,14 @@
 	  			Bindings are declared through the <code>bindings</code> property on the view. 
 	  			In their most basic form the entries in <code>bindings</code> specify
 	  			<ol>
-	  				<li>The <code>$.</code> function to call (e.g., <code>text</code>, <code>html</code>, <code>addClass</code>, <code>removeClass</code> etc.)</li>
+	  				<li>The <code>$.</code> function to call (e.g., <code>text</code>, <code>html</code>, <code>addClass</code>, <code>removeClass</code>, <code>val</code> etc.)</li>
 	  				<li>The selector that matches the target elements for the binding (e.g., <code>div > a</code>)</li>
 	  				<li>The field on the model to bind to</li>
 	  			</ol>
+	  		</p>
+	  		<br/>
+	  		<p>
+	  			Note: bi-directional binding is currently not implemented.  I.e., changing form data won't automatically update your model.  Updating the model will automatically update the form, however.
 	  		</p>
 		</blockquote>
 	<script type="text/javascript" id="ex1script">
@@ -96,7 +100,7 @@ $(function() {
 		el: $("#ex1"),
 		// the bindings property is very similar to the events hash!
 		bindings: {
-			"text span": "title",
+			"val input": "title",
 			"text div > a": "status",
 		}
 	});
@@ -118,7 +122,7 @@ $(function() {
 	</pre>
 	<h2>Result:</h2>
 	<div id="ex1" class="well">
-		<span></span>
+		<input type="text"></input>
 		<div>
 			<a href="#" class="btn btn-primary"></a>
 		</div>
