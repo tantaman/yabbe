@@ -27,6 +27,25 @@
 		blockquote {
 			border-left: 5px solid #0074CC;
 		}
+
+		#ex4 .status {
+			width: 50px;
+			height: 50px;
+			float: left;
+			margin-right: 15px;
+			background: maroon;
+			border: 4px solid black;
+		}
+
+		#ex4 .active {
+			background: green;
+		}
+
+		#ex4 .yellowBorder {
+			border: 4px solid yellow;
+		}
+
+
 	</style>
 
 	<script>
@@ -249,27 +268,69 @@ $(function() {
 	});
 	window.ex4model = new Ex4Model({
 		active: false,
-		onDeck: false
+		psyched: false
 	});
 
 	var Ex4View = Yabbe.View.extend({
 		model: ex4model,
 		el: $("#ex4"),
 		bindings: {
-			"span": {
-				fn: "text",
-				field: "concatenated"
-			},
+			// mix the basic binding format with the long hand format
+			"text span": "concatenated",
 
-			"div": {
+			// Execute different functions based on the field value
+			".status": {
 				fn: {
 					true: ["addClass", "active"],
 					false: ["removeClass", "active"]
 				},
 				field: "active"
+			},
+
+			// Bind multiple attributes on a single element
+			".combinedStatus": [
+				{
+					fn: {
+						true: ["addClass", "active"],
+						false: ["removeClass", "active"]
+					},
+					field: "active"
+				},
+				{
+					fn: {
+						true: ["addClass", "yellowBorder"],
+						false: ["removeClass", "yellowBorder"]
+					},
+					field: "psyched"
+				},
+				{
+					fn: "text",
+					field: "concatenated"
+				}
+			]
+		},
+
+		middleware: {
+			toView: {
+				"span": function(value) {
+					return value.replace("Saint", "St.").replace("Street", "St.");
+				}
 			}
 		}
 	});
+
+	new Ex4View();
+
+	ex4model.set("fname", "Saint James");
+	ex4model.set("lname", "Street James");
+
+	var i = 0;
+	window.ex4handle = setInterval(function() {
+		ex4model.set("active", i % 2 == 0);
+		ex4model.set("psyched", i % 2 == 0);
+		ex4model.set("lname", (i%2==0) ? "St. St." : "Street James");
+		++i;
+	}, 1000)
 });
 
 	// Extending the Yabbe view which just extends Backbone.View.
@@ -280,7 +341,10 @@ $(function() {
 	<pre class="script">
 	</pre>
 	<h2>Result:</h2>
-	<div id="ex4" class="example">
+	<div id="ex4" class="well">
+		<span></span>
+		<div class="status"></div>
+		<div class="combinedStatus"></div>
 	</div>
 </div>
 </body>

@@ -18,6 +18,8 @@ middlewareDefaults =
 Yabbe = this.Yabbe = {}
 
 # Yabbe.Binder
+# TODO: this needs to be split into more objects
+# TODO: we need to handle the method overloads more elegantly.
 # ------------
 Yabbe.Binder = class Binder
 	# The `Binder` constructor takes a variety of options.
@@ -72,14 +74,23 @@ Yabbe.Binder = class Binder
 	_bind: (mapping) ->
 		# mapping is generally a map of selectors to binding definitions
 		for selector, binding of mapping
-			# if the binding definition is an object then we are
+			bindingType = typeof binding;
+			if Array.isArray binding
+				bindingType = "array"
+
+			# if the binding definition is an object or an array then we are
 			# using the long hand way to declare our bindings
-			if typeof binding is "object"
+			if bindingType is "object"
 				$target = @$el.find(selector)
 				@_applyBinding($target, binding, {toView: @middleware.toView[selector]})
 
-			# if we aren't using the long hand version then the key
-			# contains the method to call and selector to apply
+			else if bindingType is "array"
+				$target = @$el.find(selector)
+				mwObj = {toView: @middleware.toView[selector]}
+				for thebinding in binding
+					@_applyBinding($target, thebinding, mwObj)
+
+			# using the short hand way of binding
 			else
 				idx = selector.indexOf(" ")
 				actualSelector = $.trim(selector.substring(idx))
@@ -139,8 +150,6 @@ Yabbe.Binder = class Binder
 	_restoreGet: (oldGet) ->
 		@model.get = oldGet
 
-
-
 callView = ($target, fn, value) ->
 	fnType = typeof fn
 	if Array.isArray(fn)
@@ -153,9 +162,14 @@ callView = ($target, fn, value) ->
 				comp = comparers[key]
 				if (comp(value))
 					$target[fnData[0]].apply($target, fnData.slice(1, fnData.length))
+		when "array"
+			for e in fn
+				callView($target, e, value)
 		else
-			for fnName in fn
-				$target[fnName](value)
+			console.log fn
+			console.log value
+			console.log $target
+			throw "Error parsing bindings"
 
 comparers = 
 	true: (val) -> val is true

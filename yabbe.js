@@ -54,15 +54,31 @@
     };
 
     Binder.prototype._bind = function(mapping) {
-      var $target, actualSelector, binding, bindingObj, idx, selector, _results;
+      var $target, actualSelector, binding, bindingObj, bindingType, idx, mwObj, selector, thebinding, _results;
       _results = [];
       for (selector in mapping) {
         binding = mapping[selector];
-        if (typeof binding === "object") {
+        bindingType = typeof binding;
+        if (Array.isArray(binding)) bindingType = "array";
+        if (bindingType === "object") {
           $target = this.$el.find(selector);
           _results.push(this._applyBinding($target, binding, {
             toView: this.middleware.toView[selector]
           }));
+        } else if (bindingType === "array") {
+          $target = this.$el.find(selector);
+          mwObj = {
+            toView: this.middleware.toView[selector]
+          };
+          _results.push((function() {
+            var _i, _len, _results2;
+            _results2 = [];
+            for (_i = 0, _len = binding.length; _i < _len; _i++) {
+              thebinding = binding[_i];
+              _results2.push(this._applyBinding($target, thebinding, mwObj));
+            }
+            return _results2;
+          }).call(this));
         } else {
           idx = selector.indexOf(" ");
           actualSelector = $.trim(selector.substring(idx));
@@ -141,7 +157,7 @@
   })();
 
   callView = function($target, fn, value) {
-    var comp, fnData, fnName, fnType, key, _i, _len, _results, _results2;
+    var comp, e, fnData, fnType, key, _i, _len, _results, _results2;
     fnType = typeof fn;
     if (Array.isArray(fn)) fnType = "array";
     switch (fnType) {
@@ -160,13 +176,19 @@
         }
         return _results;
         break;
-      default:
+      case "array":
         _results2 = [];
         for (_i = 0, _len = fn.length; _i < _len; _i++) {
-          fnName = fn[_i];
-          _results2.push($target[fnName](value));
+          e = fn[_i];
+          _results2.push(callView($target, e, value));
         }
         return _results2;
+        break;
+      default:
+        console.log(fn);
+        console.log(value);
+        console.log($target);
+        throw "Error parsing bindings";
     }
   };
 
