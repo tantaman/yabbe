@@ -8,9 +8,12 @@ So why add to the already growing number of libraries to do data binding?
 * `Yabbe` fully supports computed properties
 * `Yabbe` will automatically unbind from your models when the corresponding root view element is removed the dom
 
-Does Backbone really need data binding?  In the majority of circumstances, *no*. 
+I feel obligated to mention the following so I don't lead any newby backbone developers in the wrong direction:
+
+####Does Backbone really need data binding?####
+In the majority of circumstances, **NO**. 
 This is the case since you can control the granularity of your views and just 
-call `render` on any `change` event.  There are cases where it'd be nice to have data binding, however.
+call `render` on any `change` event.  There are cases where it'd be nice to have data binding, however.  For that there is `Yabbe`.
 
 This library is intended to provide a style of data binding that will be immediately familiar to users of `Backbone`.  `Yabbe` will also not stand in your way if you don't want to use data binding for certain elements.
 
