@@ -1,168 +1,287 @@
 <html>
 <head>
-	<script type="text/javascript" src="../lib/jquery.js"></script>
-	<script type="text/javascript" src="../lib/underscore.js"></script>
-	<script type="text/javascript" src="../lib/backbone.js"></script>
+	<script type="text/javascript" src="resources/jquery.js"></script>
+	<script type="text/javascript" src="resources/underscore.js"></script>
+	<script type="text/javascript" src="resources/backbone.js"></script>
 	<script type="text/javascript" src="../yabbe.js"></script>
 
+	<script type="text/javascript" src="resources/highlight.pack.js"></script>
+
+	<link rel="stylesheet" href="resources/styles/github.css"></link>
+	<link rel="stylesheet" href="resources/bootstrap/css/bootstrap.min.css"></link>
+
 	<style>
-		.example {
-			background: #DDD;
+		.well {
+			font-size: 14px;
+			font-weight: bold;
+		}
+
+		hr {
+			margin: 30px 0;
+		}
+
+		.red {
+			color: red;
+		}
+
+		blockquote {
+			border-left: 5px solid #0074CC;
 		}
 	</style>
 
-</head>
-<body>
+	<script>
+	function showCodeOnPage(exNum, dest) {
+		var code = $("#ex" + exNum + "script").text();
+		dest.html(hljs.highlight("javascript", code).value);
+	}
 
-	<h1>Simple short-hand text binding</h1>
-	<script type="text/javascript">
-		$(function() {
-			// added to window for manipulation in console for the curious
-			window.ex1model = new Backbone.Model({
-				title: "first example",
-				status: "ready"
-			});
-
-			var Ex1View = Yabbe.View.extend({
-				model: ex1model,
-				el: $("#ex1"),
-				bindings: { // pretty much the same as events except we specify a jquery function to call and property to watch
-					"text span": "title",
-					"text div > label": "status",
-				}
-			});
-
-			var ex1view = new Ex1View();
-
-			// Simple task to update our model
-			var i = 0;
-			setInterval(function() {
-				ex1model.set("status", (i % 2 == 0) ? "down" : "ready");
-				++i;
-			}, 1000);
+	$(function() {
+		$(".script").each(function(idx, el) {
+			showCodeOnPage(idx + 1, $(el))
 		});
+	});
 	</script>
 
-	<div id="ex1" class="example">
+</head>
+<body>
+	<div class="container">
+		<blockquote>
+  			<h1>Ex 1: Basic Binding</h1>
+  			<br/>
+  			<p>
+  				In this example we bind two model properties: <code>title</code> and <code>status</code>.  When those properties
+  				change the <code>text</code> function of the elements matched
+  				by the provided selectors is called.
+	  		</p>
+	  		<br/>
+	  		<p>
+	  			Bindings are declared through the <code>bindings</code> property on the view. 
+	  			In their most basic form the entries in <code>bindings</code> specify
+	  			<ol>
+	  				<li>The <code>$.</code> function to call (e.g., <code>text</code>, <code>html</code>, <code>addClass</code>, <code>removeClass</code> etc.)</li>
+	  				<li>The selector that matches the target elements for the binding (e.g., <code>div > a</code>)</li>
+	  				<li>The field on the model to bind to</li>
+	  			</ol>
+	  		</p>
+		</blockquote>
+	<script type="text/javascript" id="ex1script">
+$(function() {
+	// added to window for manipulation in console by the curious
+	window.ex1model = new Backbone.Model({
+		title: "first example",
+		status: "ready"
+	});
+
+	var Ex1View = Yabbe.View.extend({
+		model: ex1model,
+		el: $("#ex1"),
+		// the bindings property is very similar to the events hash!
+		bindings: {
+			"text span": "title",
+			"text div > a": "status",
+		}
+	});
+
+	var ex1view = new Ex1View();
+
+	// Simple task to update our model
+	var i = 0;
+	window.ex1handle = setInterval(function() {
+		ex1model.set("status", (i % 2 == 0) ? "down" : "ready");
+		ex1model.set("title", (i % 2 == 0) ? "the title" : "first example");
+		++i;
+	}, 1000);
+});
+	</script>
+
+	<h2>Code:</h2>
+	<pre class="script linenums">
+	</pre>
+	<h2>Result:</h2>
+	<div id="ex1" class="well">
 		<span></span>
 		<div>
-			<label></label>
+			<a href="#" class="btn btn-primary"></a>
 		</div>
 	</div>
 
-	<h1>Short-hand text binding with computed properties</h1>
-	<script>
-	$(function() {
-		var Ex2Model = Backbone.Model.extend({
-			someComputedProp: function() {
-				return this.get("title") + " " + this.get("author");
-			}
-		});
+<hr></hr>
 
-		window.ex2model = new Ex2Model({
-			title: "The Time Machine",
-			author: "H. G. Wells"
-		});
-
-		var Ex2View = Yabbe.View.extend({
-			model: ex2model,
-			el: $("#ex2"),
-			bindings: {
-				"text div.book": "someComputedProp"
-			}
-		});
-
-		var ex2view = new Ex2View();
-
-		// When any dependency of a compute property is changed
-		// then the view is updated.
-		var i = 0;
-		setInterval(function() {
-			ex2model.set("title", (i % 2 == 0) ? "The Invisible Man" : "The Time Machine");
-			++i;
-		}, 1000);
+	<blockquote>
+	<h1>Ex 2: Basic Binding with Computed Properties</h1>
+	<br/>
+	<p>
+		This is pretty much identical to the first example except we bind to a computed property.
+	</p>
+	<br/>
+	<p>
+		When any property that is referenced by the computed property is updated then the view element that is bound to that computed property will be updated.
+	</p>
+	<br/>
+	<p>
+		Computed properties should not have side-effects.  This is the case because <code>Yabbe</code> will run your computed properties once, on initialization, in order to figure out their dependencies.
+	</p>
+	</blockquote>
+	<script id="ex2script">
+$(function() {
+	var Ex2Model = Backbone.Model.extend({
+		// Here is our computed property that depends on
+		// title and author.
+		someComputedProp: function() {
+			return this.get("title") + " " + this.get("author");
+		}
 	});
+
+	// Instantiate the model.  Added to the window so you can play in the console.
+	window.ex2model = new Ex2Model({
+		title: "The Time Machine",
+		author: "H. G. Wells"
+	});
+
+	var Ex2View = Yabbe.View.extend({
+		model: ex2model,
+		el: $("#ex2"),
+		// bind the text of the book div to our computed property
+		bindings: {
+			"text div.book": "someComputedProp"
+		}
+	});
+
+	var ex2view = new Ex2View();
+
+	// When any dependency of a computed property is changed
+	// then the bound element is updated.
+	var i = 0;
+	window.ex2handle = setInterval(function() {
+		ex2model.set("title", (i % 2 == 0) ? "The Invisible Man" : "The Time Machine");
+		++i;
+	}, 1000);
+});
 	</script>
-	<div id="ex2" class="example">
+	<h2>Code:</h2>
+	<pre class="script">
+	</pre>
+
+	<h2>Result:</h2>
+	<div id="ex2" class="well">
 		<div class="book"></div>
 	</div>
 
-	<h1>Short-hand binding with middleware</h1>
-	<script>
-		$(function() {
-			window.ex3model = new Backbone.Model();
+<hr></hr>
 
-			var Ex3View = Yabbe.View.extend({
-				model: ex3model,
-				el: $("#ex3"),
-				bindings: {
-					"html div > .someClass": "uglyProp"
-				},
+	<blockquote>
+	<h1>Basic Binding with Middleware</h1>
+	<br/>
+	<p>
+		Sometimes you need to apply some formatting to your model data before placing it on the page.  In order to do that you can use <code>middleware</code> to intercept the value before it reaches the bound element.  Note: The <code>middleware</code> API is still unstable.
+	</p>
+	<br/>
+	<p>
+		The <code>middleware</code> in this example converts the model value to upper case and makes it bold and italic before sending it to the bound element.
+	</p>
+	<br/>
+	<p>
+		Of course if at any time it no longer makes sense to use data binding you can fall back to using the normal <code>Backbone</code> <code>events</code> hash.
+	</p>
+	</blockquote>
+	<script id="ex3script">
+$(function() {
+	window.ex3model = new Backbone.Model();
 
-				// And of course we can just fall back to using "events"
-				// if we don't want to use data binding.
+	var Ex3View = Yabbe.View.extend({
+		model: ex3model,
+		el: $("#ex3"),
+		bindings: {
+			"html div > .someClass": "uglyProp"
+		},
 
-				middleware: {
-					toView: { // TODO: default to toView instead...?
-						"div > .someClass": function(value) {
-							value || (value = "") // TODO: how do we want to handle undefined in general...?
-							return "<b><i>CHECK IT OUT!: " + value.toUpperCase() + "</i></b>";
-						}
-					}
+		middleware: {
+			toView: { // TODO: default to toView instead...?
+				"div > .someClass": function(value) {
+					value || (value = "") // TODO: how do we want to handle undefined in general...?
+					return "<b class='red'><i>CHECK IT OUT!: " + value.toUpperCase() + "</i></b>";
 				}
-			});
+			}
+		}
+	});
 
-			new Ex3View();
+	new Ex3View();
 
-			ex3model.set("uglyProp", "very cool");
+	ex3model.set("uglyProp", "very cool");
 
-			var i = 0;
-			setInterval(function() {
-				ex3model.set("uglyProp", (i % 2 == 0) ? "zorgburg" : "very cool");
-				++i;
-			}, 1000);
-		});
+	var i = 0;
+	setInterval(function() {
+		ex3model.set("uglyProp", (i % 2 == 0) ? "zorgburg" : "very cool");
+		++i;
+	}, 1000);
+});
 	</script>
-	<div id="ex3" class="example">
+	<h2>Code:</h2>
+	<pre class="script">
+	</pre>
+	<h2>Result:</h2>
+	<div id="ex3" class="well">
 		<div>
 			<span class="someClass"></span>
 		</div>
 	</div>
 
-	<h1>Long-hand method, specifying a bunch of coolish stuff</h1>
-	<script>
-		$(function() {
-			var Ex4Model = Backbone.Model.extend({
-				concatenated: function() {
-					return this.get("fname") + " " + this.get("lname");
-				}
-			});
-			window.ex4model = new Ex4Model({
-				active: false,
-				onDeck: false
-			});
+	<blockquote>
+		<h1>Advanced Binding</h1>
+		<p>
+			We're pulling out all the stops for this example.  This shows the verbose form that can be used to specify bindings.
+		</p>
+		<br/>
+		<p>
+			The verbose form allows you to do several things:
+			<ul>
+				<li>Bind multiple functions</li>
+				<li>Only apply functions under certain conditions, such as when a model value is <code>true</code>, <code>false</code>, <code>exists</code>, <code>doesn't exist</code>, is <code>"falsy"</code> or is <code>"truthy"</code>.
+			</ul>
+		</p>
+	</blockquote>
+	<script id="ex4script">
+$(function() {
+	var Ex4Model = Backbone.Model.extend({
+		concatenated: function() {
+			return this.get("fname") + " " + this.get("lname");
+		}
+	});
+	window.ex4model = new Ex4Model({
+		active: false,
+		onDeck: false
+	});
 
-			var Ex4View = Yabbe.View.extend({
-				model: ex4model,
-				el: $("#ex4"),
-				bindings: {
-					"span": {
-						fn: "text",
-						field: "concatenated"
-					},
+	var Ex4View = Yabbe.View.extend({
+		model: ex4model,
+		el: $("#ex4"),
+		bindings: {
+			"span": {
+				fn: "text",
+				field: "concatenated"
+			},
 
-					"div": {
-						fn: {
-							true: ["addClass", "active"],
-							false: ["removeClass", "active"]
-						},
-						field: "active"
-					}
-				}
-			});
-		});
+			"div": {
+				fn: {
+					true: ["addClass", "active"],
+					false: ["removeClass", "active"]
+				},
+				field: "active"
+			}
+		}
+	});
+});
+
+	// Extending the Yabbe view which just extends Backbone.View.
+	// If you override initialize make sure you call Yabbe.View's initialize!
+	// Yabbe.View.prototype.initialize.apply(this, arguments);
 	</script>
+	<h2>Code:</h2>
+	<pre class="script">
+	</pre>
+	<h2>Result:</h2>
 	<div id="ex4" class="example">
 	</div>
+</div>
 </body>
 </html>
