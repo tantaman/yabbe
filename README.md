@@ -6,6 +6,7 @@ So why add to the already growing number of libraries to do data binding?
 * `Yabbe` fits backbone nicely
 * `Yabbe` forgoes much of the magic of other libraries for just a little more typing
 * `Yabbe` fully supports computed properties
+* `Yabbe` will automatically unbind from your models when the corresponding root view element is removed the dom
 
 This library is intended to provide a style of data binding that will be immediately familiar to users of `Backbone`.  `Yabbe` will also not stand in your way if you don't want to use data binding for certain elements.
 
