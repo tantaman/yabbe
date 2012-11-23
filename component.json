@@ -1,0 +1,12 @@
+{
+	"name": "yabbe",
+	"version": "1.0.0",
+	"main": "yabbe.js",
+	"dependencies": {
+		"backbone": "latest"
+	},
+	"author": {
+		"name": "Matt Crinklaw-Vogt",
+		"email": "matt.crinklaw@gmail.com"
+	}
+}
